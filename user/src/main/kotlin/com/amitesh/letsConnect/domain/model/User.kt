@@ -1,4 +1,4 @@
-package com.amitesh.com.amitesh.user.domain.model
+package com.amitesh.letsConnect.domain.model
 
 import java.util.UUID
 

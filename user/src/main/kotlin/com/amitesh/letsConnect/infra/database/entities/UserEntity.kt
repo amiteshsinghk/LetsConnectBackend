@@ -1,6 +1,6 @@
-package com.amitesh.com.amitesh.user.infra.database.entities
+package com.amitesh.letsConnect.infra.database.entities
 
-import com.amitesh.com.amitesh.user.domain.model.UserId
+import com.amitesh.letsConnect.domain.model.UserId
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
