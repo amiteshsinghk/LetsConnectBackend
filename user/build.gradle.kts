@@ -2,11 +2,6 @@ plugins {
     id("java-library")
     id("letsConnect.spring-boot-service")
     kotlin("plugin.jpa")
-//    alias(libs.plugins.kotlin.jvm)
-//    alias(libs.plugins.kotlin.jpa)
-//    alias(libs.plugins.spring.boot)
-//    alias(libs.plugins.spring.dependency.management)
-//    alias(libs.plugins.kotlin.spring)
 }
 
 group = "com.amitesh"
@@ -20,6 +15,10 @@ repositories {
 
 dependencies {
     implementation(projects.common)
+
+    implementation(libs.spring.boot.starter.data.jpa)
+    runtimeOnly(libs.postgresql)
+
     testImplementation(kotlin("test"))
 }
 
