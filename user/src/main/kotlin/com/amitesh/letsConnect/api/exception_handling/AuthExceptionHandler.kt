@@ -1,5 +1,6 @@
 package com.amitesh.letsConnect.api.exception_handling
 
+import com.amitesh.letsConnect.domain.exception.InvalidTokenException
 import com.amitesh.letsConnect.domain.exception.UserAlreadyExistException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,6 +16,15 @@ class AuthExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     fun onUserAlreadyExists(
         e: UserAlreadyExistException
+    ) = mapOf(
+        "code" to "USER_EXISTS",
+        "message" to e.message
+    )
+
+    @ExceptionHandler(InvalidTokenException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    fun onInvalidToken(
+        e: InvalidTokenException
     ) = mapOf(
         "code" to "USER_EXISTS",
         "message" to e.message
