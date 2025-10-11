@@ -1,0 +1,7 @@
+package com.amitesh.letsConnect.domain.model
+
+data class AuthenticatedUser(
+    val user: User,
+    val accessToken: String,
+    val refreshToken: String,
+)
