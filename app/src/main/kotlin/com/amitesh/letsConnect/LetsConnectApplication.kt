@@ -8,6 +8,5 @@ import org.springframework.boot.runApplication
 class LetsConnectApplication
 
 fun main(args: Array<String>) {
-    Testing()
 	runApplication<LetsConnectApplication>(*args)
 }
