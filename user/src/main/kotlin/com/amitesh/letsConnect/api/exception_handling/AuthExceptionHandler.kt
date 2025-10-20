@@ -46,7 +46,7 @@ class AuthExceptionHandler {
     fun onInvalidToken(
         e: InvalidTokenException
     ) = mapOf(
-        "code" to "USER_EXISTS",
+        "code" to "INVALID_TOKEN",
         "message" to e.message
     )
 
