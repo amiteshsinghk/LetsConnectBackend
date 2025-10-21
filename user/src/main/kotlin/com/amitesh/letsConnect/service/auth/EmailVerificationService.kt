@@ -1,0 +1,81 @@
+package com.amitesh.letsConnect.service.auth
+
+import com.amitesh.letsConnect.domain.exception.InvalidTokenException
+import com.amitesh.letsConnect.domain.exception.UserNotFoundException
+import com.amitesh.letsConnect.domain.model.EmailVerificationToken
+import com.amitesh.letsConnect.infra.database.entities.EmailVerificationTokenEntity
+import com.amitesh.letsConnect.infra.database.mappers.toEmailVerificationToken
+import com.amitesh.letsConnect.infra.database.repositories.EmailVerificationTokenRepository
+import com.amitesh.letsConnect.infra.database.repositories.UserRepository
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit
+
+@Service
+class EmailVerificationService(
+    private val emailVerificationTokenRepository: EmailVerificationTokenRepository,
+    private val userRepository: UserRepository,
+    @param:Value("\${letsconnect.email.verification.expiry-hours}") private val expiryHours: Long
+) {
+    @Transactional
+    fun createVerificationToken(email: String): EmailVerificationToken{
+        val userEntity = userRepository.findByEmail(email)
+            ?: throw UserNotFoundException()
+        val existingToken = emailVerificationTokenRepository.findByUserAndUsedAtIsNull(
+            user = userEntity
+        )
+
+        val now = Instant.now()
+        val usedToken = existingToken.map {
+            it.apply {
+                this.usedAt = now
+            }
+        }
+        emailVerificationTokenRepository.saveAll(
+            usedToken
+        )
+
+        val token = EmailVerificationTokenEntity(
+            expiresAt = now.plus(expiryHours, ChronoUnit.HOURS),
+            user = userEntity
+        )
+
+        return emailVerificationTokenRepository.save(token).toEmailVerificationToken()
+    }
+
+    @Transactional
+    fun verifyEmail(token: String){
+        val verificationToken = emailVerificationTokenRepository.findByToken(token)
+            ?: throw InvalidTokenException("Email verification token is invalid.")
+
+        if(verificationToken.isUsed){
+            throw InvalidTokenException("Email verification token is already used.")
+        }
+
+        if (verificationToken.isExpired){
+            throw InvalidTokenException("Email verification token has already expired.")
+        }
+
+        emailVerificationTokenRepository.save(
+            verificationToken.apply {
+                this.usedAt = Instant.now()
+            }
+        )
+
+        userRepository.save(
+            verificationToken.user.apply {
+                this.hasVerifiedemail = true
+            }
+        )
+    }
+    @Scheduled(cron = "0 0 3 * * *")
+    fun cleanupExpiredTokens() {
+        emailVerificationTokenRepository.deleteByExpiresAtLessThan(
+            now = Instant.now()
+        )
+    }
+}

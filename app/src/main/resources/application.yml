@@ -35,3 +35,8 @@ spring:
 jwt:
   secret: ${JWT_SECRET_BASE64}
   expiration-minutes: 15
+
+letsconnect:
+  email:
+    verification:
+      expiry-hour: 24
