@@ -1,5 +1,6 @@
 package com.amitesh.letsConnect.api.exception_handling
 
+import com.amitesh.letsConnect.domain.exception.EmailNotVerifiedException
 import com.amitesh.letsConnect.domain.exception.InvalidCredentialException
 import com.amitesh.letsConnect.domain.exception.InvalidTokenException
 import com.amitesh.letsConnect.domain.exception.UserAlreadyExistException
@@ -46,7 +47,16 @@ class AuthExceptionHandler {
     fun onInvalidToken(
         e: InvalidTokenException
     ) = mapOf(
-        "code" to "USER_EXISTS",
+        "code" to "INVALID_TOKEN",
+        "message" to e.message
+    )
+
+    @ExceptionHandler(EmailNotVerifiedException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    fun onEmailNotVerified(
+        e: EmailNotVerifiedException
+    ) = mapOf(
+        "code" to "EMAIL_NOT_VERIFIED",
         "message" to e.message
     )
 

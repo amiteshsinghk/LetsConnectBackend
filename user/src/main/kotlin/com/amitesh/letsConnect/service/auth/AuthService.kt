@@ -1,5 +1,6 @@
 package com.amitesh.letsConnect.service.auth
 
+import com.amitesh.letsConnect.domain.exception.EmailNotVerifiedException
 import com.amitesh.letsConnect.domain.exception.InvalidCredentialException
 import com.amitesh.letsConnect.domain.exception.InvalidTokenException
 import com.amitesh.letsConnect.domain.exception.UserAlreadyExistException
@@ -25,8 +26,10 @@ class AuthService(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
     private val jwtService: JwtService,
-    private val refreshTokenRepository: RefreshTokenRepository
+    private val refreshTokenRepository: RefreshTokenRepository,
+    private val emailVerificationService: EmailVerificationService
 ) {
+    @Transactional
     fun register(email: String, username: String, password: String): User {
         val userExist = userRepository.findByEmailOrUsername(
             email = email.trim(),
@@ -39,13 +42,15 @@ class AuthService(
             }
 
         }
-        val saveduser = userRepository.save(
+
+        val saveduser = userRepository.saveAndFlush(
             UserEntity(
                 email = email.trim(),
                 username = username.trim(),
                 hashedPassword = passwordEncoder.encode(password)
             )
         ).toUser()
+        val token = emailVerificationService.createVerificationToken(email.trim())
         return saveduser
     }
 
@@ -60,8 +65,10 @@ class AuthService(
             throw InvalidCredentialException()
         }
 
-        //TODO: Check for verified email
 
+        if (!user.hasVerifiedemail){
+            throw EmailNotVerifiedException()
+        }
         return  user.id?.let { userId ->
             val accessToken = jwtService.generateAccessToken(userId = userId)
             val refreshToken = jwtService.generateRefreshToken(userId = userId)
@@ -92,7 +99,7 @@ class AuthService(
             refreshTokenRepository.findByUserIdAndHashedToken(
                 userId = userId,
                 hashedToken = hashed
-            ) ?: throw InvalidTokenException("Invalid refresh taken")
+            ) ?: throw InvalidTokenException("Invalid refresh token")
             refreshTokenRepository.deleteByUserIdAndHashedToken(
                 userId = userId,
                 hashedToken = hashed
@@ -110,6 +117,12 @@ class AuthService(
             )
 
         } ?: throw UserNotFoundException()
+    }
+    @Transactional
+    fun logout(refreshToken: String){
+        val userId = jwtService.getUserIdFromToken(refreshToken)
+        val hashed = hashedToken(refreshToken)
+        refreshTokenRepository.deleteByUserIdAndHashedToken(userId,hashed)
     }
 
     private fun storeRefreshToken(userId: UserId, token: String) {
