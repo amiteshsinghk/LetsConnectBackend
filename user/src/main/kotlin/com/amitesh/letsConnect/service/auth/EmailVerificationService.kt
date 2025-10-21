@@ -18,7 +18,7 @@ import java.time.temporal.ChronoUnit
 class EmailVerificationService(
     private val emailVerificationTokenRepository: EmailVerificationTokenRepository,
     private val userRepository: UserRepository,
-    @param:Value("\${letsconnect.email.verification.expiry-hours}") private val expiryHours: Long
+    @param:Value("\${letsconnect.email.verification.expiry-hour}") private val expiryHours: Long
 ) {
     @Transactional
     fun createVerificationToken(email: String): EmailVerificationToken{
