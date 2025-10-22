@@ -1,4 +1,4 @@
-package com.amitesh.letsConnect.service.auth
+package com.amitesh.letsConnect.service
 
 import com.amitesh.letsConnect.domain.exception.InvalidTokenException
 import com.amitesh.letsConnect.domain.model.UserId

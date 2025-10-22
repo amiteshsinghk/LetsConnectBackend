@@ -1,4 +1,4 @@
-package com.amitesh.letsConnect.service.auth
+package com.amitesh.letsConnect.service
 
 import com.amitesh.letsConnect.domain.exception.EmailNotVerifiedException
 import com.amitesh.letsConnect.domain.exception.InvalidCredentialException
@@ -50,7 +50,7 @@ class AuthService(
                 hashedPassword = passwordEncoder.encode(password)
             )
         ).toUser()
-        val token = emailVerificationService.createVerificationToken(email.trim())
+        emailVerificationService.createVerificationToken(email.trim())
         return saveduser
     }
 

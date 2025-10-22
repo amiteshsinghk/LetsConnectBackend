@@ -3,6 +3,7 @@ package com.amitesh.letsConnect.api.exception_handling
 import com.amitesh.letsConnect.domain.exception.EmailNotVerifiedException
 import com.amitesh.letsConnect.domain.exception.InvalidCredentialException
 import com.amitesh.letsConnect.domain.exception.InvalidTokenException
+import com.amitesh.letsConnect.domain.exception.SamePasswordException
 import com.amitesh.letsConnect.domain.exception.UserAlreadyExistException
 import com.amitesh.letsConnect.domain.exception.UserNotFoundException
 import org.springframework.http.HttpStatus
@@ -60,6 +61,15 @@ class AuthExceptionHandler {
         "message" to e.message
     )
 
+    @ExceptionHandler(SamePasswordException::class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    fun onSamePassword(
+        e: SamePasswordException
+    ) = mapOf(
+        "code" to "SAME_PASSWORD",
+        "message" to e.message
+    )
+
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun onValidationException(
         e: MethodArgumentNotValidException
@@ -77,6 +87,5 @@ class AuthExceptionHandler {
                 )
             )
     }
-
 }
 

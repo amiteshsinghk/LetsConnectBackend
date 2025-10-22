@@ -1,4 +1,4 @@
-package com.amitesh.letsConnect.service.auth
+package com.amitesh.letsConnect.service
 
 import com.amitesh.letsConnect.domain.exception.InvalidTokenException
 import com.amitesh.letsConnect.domain.exception.UserNotFoundException
@@ -24,22 +24,11 @@ class EmailVerificationService(
     fun createVerificationToken(email: String): EmailVerificationToken{
         val userEntity = userRepository.findByEmail(email)
             ?: throw UserNotFoundException()
-        val existingToken = emailVerificationTokenRepository.findByUserAndUsedAtIsNull(
-            user = userEntity
-        )
 
-        val now = Instant.now()
-        val usedToken = existingToken.map {
-            it.apply {
-                this.usedAt = now
-            }
-        }
-        emailVerificationTokenRepository.saveAll(
-            usedToken
-        )
+        emailVerificationTokenRepository.invalidateActiveTokenForUser(userEntity)
 
         val token = EmailVerificationTokenEntity(
-            expiresAt = now.plus(expiryHours, ChronoUnit.HOURS),
+            expiresAt = Instant.now().plus(expiryHours, ChronoUnit.HOURS),
             user = userEntity
         )
 
