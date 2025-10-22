@@ -1,6 +1,6 @@
 package com.amitesh.letsConnect.infra.database.repositories
 
-import com.amitesh.letsConnect.infra.database.entities.EmailVerificationTokenEntity
+import com.amitesh.letsConnect.infra.database.entities.PasswordResetTokenEntity
 import com.amitesh.letsConnect.infra.database.entities.UserEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
@@ -8,16 +8,16 @@ import org.springframework.data.jpa.repository.Query
 import java.time.Instant
 
 
-interface EmailVerificationTokenRepository: JpaRepository<EmailVerificationTokenEntity, Long> {
-    fun findByToken(token: String): EmailVerificationTokenEntity?
+interface PasswordResetTokenRepository: JpaRepository<PasswordResetTokenEntity, Long> {
+    fun findByToken(token: String): PasswordResetTokenEntity?
     fun deleteByExpiresAtLessThan(now: Instant)
-//    fun findByUserAndUsedAtIsNull(user: UserEntity): List<EmailVerificationTokenEntity>
+//    fun findByUserAndUsedAtIsNull(user: UserEntity): List<PasswordResetTokenEntity>
 
     @Modifying
     @Query("""
-        UPDATE EmailVerificationTokenEntity e
-        SET e.usedAt = CURRENT_TIMESTAMP
-        WHERE e.user = :user
+        UPDATE PasswordResetTokenEntity p
+        SET p.usedAt = CURRENT_TIMESTAMP
+        WHERE p.user = :user
     """)
     fun invalidateActiveTokenForUser(user: UserEntity)
 }

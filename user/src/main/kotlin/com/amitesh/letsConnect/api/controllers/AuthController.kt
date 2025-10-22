@@ -1,14 +1,18 @@
 package com.amitesh.letsConnect.api.controllers
 
 import com.amitesh.letsConnect.api.dto.AuthenticatedUserDto
+import com.amitesh.letsConnect.api.dto.ChangePasswordRequest
+import com.amitesh.letsConnect.api.dto.EmailRequest
 import com.amitesh.letsConnect.api.dto.LoginRequest
 import com.amitesh.letsConnect.api.dto.RefreshRequest
 import com.amitesh.letsConnect.api.dto.RegisterRequest
+import com.amitesh.letsConnect.api.dto.ResetPasswordRequest
 import com.amitesh.letsConnect.api.dto.UserDto
 import com.amitesh.letsConnect.api.mappers.toAuthenticatedUserDto
 import com.amitesh.letsConnect.api.mappers.toUserDto
-import com.amitesh.letsConnect.service.auth.AuthService
-import com.amitesh.letsConnect.service.auth.EmailVerificationService
+import com.amitesh.letsConnect.service.AuthService
+import com.amitesh.letsConnect.service.EmailVerificationService
+import com.amitesh.letsConnect.service.PasswordResetService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -19,8 +23,10 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/auth")
-class AuthController(private val authService: AuthService,
-    private val emailVerificationService: EmailVerificationService
+class AuthController(
+    private val authService: AuthService,
+    private val emailVerificationService: EmailVerificationService,
+    private val passwordResetService: PasswordResetService,
     ) {
 
     @PostMapping("/register")
@@ -65,5 +71,29 @@ class AuthController(private val authService: AuthService,
         @RequestParam token: String
     ) {
         emailVerificationService.verifyEmail(token)
+    }
+
+    @PostMapping("/forgot-password")
+    fun forgotPassword(
+        @Valid @RequestBody body: EmailRequest
+    ){
+        passwordResetService.requestPasswordReset(body.email)
+    }
+
+    @PostMapping("/reset-password")
+    fun resetPassword(
+        @Valid @RequestBody body: ResetPasswordRequest
+    ){
+        passwordResetService.resetPassword(
+            token = body.token,
+            newPassword = body.newPassword
+        )
+    }
+
+    @PostMapping("/change-password")
+    fun changePassword(
+        @Valid @RequestBody body: ChangePasswordRequest
+    ){
+        // TODO: Extract request userId and call service
     }
 }

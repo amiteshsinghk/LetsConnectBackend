@@ -41,3 +41,5 @@ letsconnect:
   email:
     verification:
       expiry-hour: 24
+    reset-password:
+      expiry-minutes: 30
