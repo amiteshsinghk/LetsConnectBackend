@@ -10,6 +10,7 @@ import com.amitesh.letsConnect.api.dto.ResetPasswordRequest
 import com.amitesh.letsConnect.api.dto.UserDto
 import com.amitesh.letsConnect.api.mappers.toAuthenticatedUserDto
 import com.amitesh.letsConnect.api.mappers.toUserDto
+import com.amitesh.letsConnect.infra.rate_limiting.EmailRateLimiter
 import com.amitesh.letsConnect.service.AuthService
 import com.amitesh.letsConnect.service.EmailVerificationService
 import com.amitesh.letsConnect.service.PasswordResetService
@@ -27,6 +28,7 @@ class AuthController(
     private val authService: AuthService,
     private val emailVerificationService: EmailVerificationService,
     private val passwordResetService: PasswordResetService,
+    private val emailRateLimiter: EmailRateLimiter
     ) {
 
     @PostMapping("/register")
@@ -64,6 +66,18 @@ class AuthController(
         @RequestBody body: RefreshRequest
     ){
         authService.logout(body.refreshToken)
+    }
+
+    @PostMapping("/resend-verification")
+    fun resendVerification(
+        @Valid @RequestBody body: EmailRequest
+    ){
+        emailRateLimiter.withRateLimit(
+            email = body.email
+        ){
+            emailVerificationService.resendVerificationEmail(body.email)
+        }
+
     }
 
     @GetMapping("/verify")

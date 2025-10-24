@@ -20,6 +20,11 @@ class EmailVerificationService(
     private val userRepository: UserRepository,
     @param:Value("\${letsconnect.email.verification.expiry-hour}") private val expiryHours: Long
 ) {
+
+    fun resendVerificationEmail(email: String){
+        //TODO: Trigger Verification Email
+    }
+
     @Transactional
     fun createVerificationToken(email: String): EmailVerificationToken{
         val userEntity = userRepository.findByEmail(email)
