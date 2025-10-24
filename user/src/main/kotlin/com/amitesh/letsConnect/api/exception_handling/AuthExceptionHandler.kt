@@ -3,6 +3,7 @@ package com.amitesh.letsConnect.api.exception_handling
 import com.amitesh.letsConnect.domain.exception.EmailNotVerifiedException
 import com.amitesh.letsConnect.domain.exception.InvalidCredentialException
 import com.amitesh.letsConnect.domain.exception.InvalidTokenException
+import com.amitesh.letsConnect.domain.exception.RateLimitException
 import com.amitesh.letsConnect.domain.exception.SamePasswordException
 import com.amitesh.letsConnect.domain.exception.UserAlreadyExistException
 import com.amitesh.letsConnect.domain.exception.UserNotFoundException
@@ -67,6 +68,15 @@ class AuthExceptionHandler {
         e: SamePasswordException
     ) = mapOf(
         "code" to "SAME_PASSWORD",
+        "message" to e.message
+    )
+
+    @ExceptionHandler(RateLimitException::class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    fun onRateLimitExceeded(
+        e: RateLimitException
+    ) = mapOf(
+        "code" to "RATE_LIMIT_EXCEEDED",
         "message" to e.message
     )
 
