@@ -1,5 +1,6 @@
 package com.amitesh.letsConnect.api.controllers
 
+import com.amitesh.letsConnect.api.config.IpRateLimit
 import com.amitesh.letsConnect.api.dto.AuthenticatedUserDto
 import com.amitesh.letsConnect.api.dto.ChangePasswordRequest
 import com.amitesh.letsConnect.api.dto.EmailRequest
@@ -10,6 +11,7 @@ import com.amitesh.letsConnect.api.dto.ResetPasswordRequest
 import com.amitesh.letsConnect.api.dto.UserDto
 import com.amitesh.letsConnect.api.mappers.toAuthenticatedUserDto
 import com.amitesh.letsConnect.api.mappers.toUserDto
+import com.amitesh.letsConnect.api.util.requestUserId
 import com.amitesh.letsConnect.infra.rate_limiting.EmailRateLimiter
 import com.amitesh.letsConnect.service.AuthService
 import com.amitesh.letsConnect.service.EmailVerificationService
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.util.concurrent.TimeUnit
 
 @RestController
 @RequestMapping("/api/auth")
@@ -32,6 +35,11 @@ class AuthController(
     ) {
 
     @PostMapping("/register")
+    @IpRateLimit(
+        requests = 10,
+        duration = 1L,
+        unit = TimeUnit.HOURS
+    )
     fun register(
         @Valid @RequestBody body: RegisterRequest
     ): UserDto{
@@ -43,6 +51,11 @@ class AuthController(
     }
 
     @PostMapping("/login")
+    @IpRateLimit(
+        requests = 10,
+        duration = 1L,
+        unit = TimeUnit.HOURS
+    )
     fun login(
         @RequestBody body: LoginRequest
     ): AuthenticatedUserDto{
@@ -69,6 +82,11 @@ class AuthController(
     }
 
     @PostMapping("/resend-verification")
+    @IpRateLimit(
+        requests = 10,
+        duration = 1L,
+        unit = TimeUnit.HOURS
+    )
     fun resendVerification(
         @Valid @RequestBody body: EmailRequest
     ){
@@ -77,7 +95,6 @@ class AuthController(
         ){
             emailVerificationService.resendVerificationEmail(body.email)
         }
-
     }
 
     @GetMapping("/verify")
@@ -88,6 +105,11 @@ class AuthController(
     }
 
     @PostMapping("/forgot-password")
+    @IpRateLimit(
+        requests = 10,
+        duration = 1L,
+        unit = TimeUnit.HOURS
+    )
     fun forgotPassword(
         @Valid @RequestBody body: EmailRequest
     ){
@@ -108,6 +130,10 @@ class AuthController(
     fun changePassword(
         @Valid @RequestBody body: ChangePasswordRequest
     ){
-        // TODO: Extract request userId and call service
+        passwordResetService.changePassword(
+            userId = requestUserId,
+            oldPassword = body.oldPassword,
+            newPassword = body.newPassword
+        )
     }
 }
