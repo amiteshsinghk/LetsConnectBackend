@@ -11,6 +11,7 @@ import com.amitesh.letsConnect.api.dto.ResetPasswordRequest
 import com.amitesh.letsConnect.api.dto.UserDto
 import com.amitesh.letsConnect.api.mappers.toAuthenticatedUserDto
 import com.amitesh.letsConnect.api.mappers.toUserDto
+import com.amitesh.letsConnect.api.util.requestUserId
 import com.amitesh.letsConnect.infra.rate_limiting.EmailRateLimiter
 import com.amitesh.letsConnect.service.AuthService
 import com.amitesh.letsConnect.service.EmailVerificationService
@@ -129,6 +130,10 @@ class AuthController(
     fun changePassword(
         @Valid @RequestBody body: ChangePasswordRequest
     ){
-        // TODO: Extract request userId and call service
+        passwordResetService.changePassword(
+            userId = requestUserId,
+            oldPassword = body.oldPassword,
+            newPassword = body.newPassword
+        )
     }
 }
