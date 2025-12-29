@@ -4,10 +4,10 @@ spring:
 
   data:
     redis:
-      host: "redis-14598.crce182.ap-south-1-1.ec2.redns.redis-cloud.com"
+      host: "redis-12308.c264.ap-south-1-1.ec2.cloud.redislabs.com"
       password: ${REDIS_PASSWORD}
       username: "default"
-      port: 14598
+      port: 12308
       connect-timeout: 5000ms
       timeout: 2000ms
 
@@ -40,7 +40,39 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         show_sql: true
-        ddl-auto: update
+#        ddl-auto: update
+
+  mail:
+    port: 587
+    password: ${MAILGUN_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
+  rabbitmq:
+    host: fuji.lmq.cloudamqp.com
+    password: ${RABBITMQ_PASSWORD}
+    username: raplmglc
+    ssl:
+      enabled: true
+    virtual-host: raplmglc
+    listener:
+      simple:
+        acknowledge-mode: auto
+        concurrency: 1
+        max-concurrency: 3
+        prefetch: 10
+        default-requeue_rejected: true
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          max-interval: 10000ms
+          max-attempts: 3
+          multiplier: 2
 
 jwt:
   secret: ${JWT_SECRET_BASE64}
@@ -48,6 +80,7 @@ jwt:
 
 letsconnect:
   email:
+    from: mail@letsconnect.com
     verification:
       expiry-hour: 24
     reset-password:

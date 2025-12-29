@@ -1,7 +1,7 @@
 package com.amitesh.letsConnect.service
 
+import com.amitesh.letsConnect.domain.type.UserId
 import com.amitesh.letsConnect.domain.exception.InvalidTokenException
-import com.amitesh.letsConnect.domain.model.UserId
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
