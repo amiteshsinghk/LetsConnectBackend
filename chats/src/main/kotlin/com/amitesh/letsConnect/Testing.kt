@@ -1,4 +1,4 @@
-package com.amitesh.com.amitesh.chats
+package com.amitesh.letsConnect
 
 class Testing {
     init {
