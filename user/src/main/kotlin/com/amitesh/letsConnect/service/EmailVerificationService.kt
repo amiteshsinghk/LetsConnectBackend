@@ -1,5 +1,7 @@
 package com.amitesh.letsConnect.service
 
+import com.amitesh.letsConnect.domain.events.user.UserEvent
+import com.amitesh.letsConnect.infra.message_queue.EventPublisher
 import com.amitesh.letsConnect.domain.exception.InvalidTokenException
 import com.amitesh.letsConnect.domain.exception.UserNotFoundException
 import com.amitesh.letsConnect.domain.model.EmailVerificationToken
@@ -18,11 +20,24 @@ import java.time.temporal.ChronoUnit
 class EmailVerificationService(
     private val emailVerificationTokenRepository: EmailVerificationTokenRepository,
     private val userRepository: UserRepository,
-    @param:Value("\${letsconnect.email.verification.expiry-hour}") private val expiryHours: Long
+    @param:Value("\${letsconnect.email.verification.expiry-hour}") private val expiryHours: Long,
+    private val eventPublisher: EventPublisher
 ) {
-
+    @Transactional
     fun resendVerificationEmail(email: String){
-        //TODO: Trigger Verification Email
+        val token = createVerificationToken(email)
+        if (token.user.hasEmailVerifid) {
+            return
+        }
+
+        eventPublisher.publish(
+            event = UserEvent.RequestResendVerification(
+               userId = token.user.id,
+                email = token.user.email,
+                username = token.user.username,
+                verificationToken = token.token
+            )
+        )
     }
 
     @Transactional

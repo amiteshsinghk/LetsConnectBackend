@@ -1,6 +1,6 @@
 package com.amitesh.letsConnect.infra.database.repositories
 
-import com.amitesh.letsConnect.domain.model.UserId
+import com.amitesh.letsConnect.domain.type.UserId
 import com.amitesh.letsConnect.infra.database.entities.UserEntity
 import org.springframework.data.jpa.repository.JpaRepository
 

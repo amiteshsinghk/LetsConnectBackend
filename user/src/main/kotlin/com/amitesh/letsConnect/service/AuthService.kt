@@ -1,5 +1,8 @@
 package com.amitesh.letsConnect.service
 
+import com.amitesh.letsConnect.domain.events.user.UserEvent
+import com.amitesh.letsConnect.domain.type.UserId
+import com.amitesh.letsConnect.infra.message_queue.EventPublisher
 import com.amitesh.letsConnect.domain.exception.EmailNotVerifiedException
 import com.amitesh.letsConnect.domain.exception.InvalidCredentialException
 import com.amitesh.letsConnect.domain.exception.InvalidTokenException
@@ -7,7 +10,6 @@ import com.amitesh.letsConnect.domain.exception.UserAlreadyExistException
 import com.amitesh.letsConnect.domain.exception.UserNotFoundException
 import com.amitesh.letsConnect.domain.model.AuthenticatedUser
 import com.amitesh.letsConnect.domain.model.User
-import com.amitesh.letsConnect.domain.model.UserId
 import com.amitesh.letsConnect.infra.database.entities.RefreshTokenEntity
 import com.amitesh.letsConnect.infra.database.entities.UserEntity
 import com.amitesh.letsConnect.infra.database.mappers.toUser
@@ -27,7 +29,8 @@ class AuthService(
     private val passwordEncoder: PasswordEncoder,
     private val jwtService: JwtService,
     private val refreshTokenRepository: RefreshTokenRepository,
-    private val emailVerificationService: EmailVerificationService
+    private val emailVerificationService: EmailVerificationService,
+    private val eventPublisher: EventPublisher
 ) {
     @Transactional
     fun register(email: String, username: String, password: String): User {
@@ -50,7 +53,16 @@ class AuthService(
                 hashedPassword = passwordEncoder.encode(password)
             )
         ).toUser()
-        emailVerificationService.createVerificationToken(email.trim())
+        val token = emailVerificationService.createVerificationToken(email.trim())
+
+        eventPublisher.publish(
+            event = UserEvent.Created(
+                userId = saveduser.id,
+                email = saveduser.email,
+                username = saveduser.username,
+                verificationToken = token.token
+            )
+        )
         return saveduser
     }
 

@@ -1,6 +1,7 @@
 package com.amitesh.letsConnect.api.dto
 
-import com.amitesh.letsConnect.domain.model.UserId
+import com.amitesh.letsConnect.domain.type.UserId
+
 
 data class UserDto(
     val id: UserId,
