@@ -1,14 +1,16 @@
 package com.amitesh.letsConnect.service
 
+import com.amitesh.letsConnect.domain.events.user.UserEvent
+import com.amitesh.letsConnect.domain.type.UserId
 import com.amitesh.letsConnect.domain.exception.InvalidCredentialException
 import com.amitesh.letsConnect.domain.exception.InvalidTokenException
 import com.amitesh.letsConnect.domain.exception.SamePasswordException
 import com.amitesh.letsConnect.domain.exception.UserNotFoundException
-import com.amitesh.letsConnect.domain.model.UserId
 import com.amitesh.letsConnect.infra.database.entities.PasswordResetTokenEntity
 import com.amitesh.letsConnect.infra.database.repositories.PasswordResetTokenRepository
 import com.amitesh.letsConnect.infra.database.repositories.RefreshTokenRepository
 import com.amitesh.letsConnect.infra.database.repositories.UserRepository
+import com.amitesh.letsConnect.infra.message_queue.EventPublisher
 import com.amitesh.letsConnect.infra.security.PasswordEncoder
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Value
@@ -25,6 +27,7 @@ class PasswordResetService(
     private val passwordEncoder: PasswordEncoder,
     @param:Value("\${letsconnect.email.reset-password.expiry-minutes}") private val expiryMinutes: Long,
     private val refreshTokenRepository: RefreshTokenRepository,
+    private val eventPublisher: EventPublisher
 ) {
     @Transactional
     fun requestPasswordReset(email: String){
@@ -38,7 +41,15 @@ class PasswordResetService(
         )
         passwordResetTokenRepository.save(token)
 
-        // TODO: Inform notification service about password reset trigger to send email
+        eventPublisher.publish(
+            event = UserEvent.RequestResetPassword(
+                userId = user.id!!,
+                email = user.email,
+                username = user.username,
+                passwordResetToken = token.token,
+                expiresInMinutes = expiryMinutes
+            )
+        )
     }
 
     @Transactional
