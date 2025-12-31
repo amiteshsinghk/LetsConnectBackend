@@ -7,6 +7,7 @@ import com.amitesh.letsConnect.domain.exception.UserNotFoundException
 import com.amitesh.letsConnect.domain.model.EmailVerificationToken
 import com.amitesh.letsConnect.infra.database.entities.EmailVerificationTokenEntity
 import com.amitesh.letsConnect.infra.database.mappers.toEmailVerificationToken
+import com.amitesh.letsConnect.infra.database.mappers.toUser
 import com.amitesh.letsConnect.infra.database.repositories.EmailVerificationTokenRepository
 import com.amitesh.letsConnect.infra.database.repositories.UserRepository
 import org.springframework.beans.factory.annotation.Value
@@ -78,6 +79,14 @@ class EmailVerificationService(
             verificationToken.user.apply {
                 this.hasVerifiedemail = true
             }
+        ).toUser()
+
+        eventPublisher.publish(
+            event = UserEvent.Verified(
+                userId = verificationToken.user.id!!,
+                email = verificationToken.user.email,
+                username = verificationToken.user.username
+            )
         )
     }
     @Scheduled(cron = "0 0 3 * * *")

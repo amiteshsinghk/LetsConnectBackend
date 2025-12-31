@@ -13,7 +13,7 @@ class NotificationUserEventListener(private val emailService: EmailService) {
     @RabbitListener(queues = [MessageQueues.NOTIFICATION_USER_EVENTS])
     @Transactional
     fun handleUserEvent(userEvent: UserEvent){
-        println("handleUserEvent! ==> $userEvent")
+        println("NotificationUserEventListener :: handleUserEvent! ==> $userEvent")
         when(userEvent){
             is UserEvent.Created -> {
                 println("User created!")
